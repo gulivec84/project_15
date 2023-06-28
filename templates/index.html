@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CSV Data</title>
+    <style>
+        /* CSS стилі */
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .upload-wrapper {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .upload-btn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin-top: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .upload-btn:hover {
+            background-color: #45a049;
+        }
+
+        .success-message {
+            color: green;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .error-message {
+            color: red;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .data-table {
+            max-height: 300px;
+            overflow-y: auto;
+            width: 100%;
+            background-color: white;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        thead th {
+            background-color: #f2f2f2;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        tbody tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        .chart-container {
+            margin-top: 40px;
+        }
+
+        .chart-description {
+            color: #666;
+            margin-top: 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>CSV Data</h1>
+        <div class="upload-wrapper">
+            <form action="/" method="POST" enctype="multipart/form-data">
+                <input id="file-upload" type="file" name="file" accept=".csv" style="display: none;">
+                <label for="file-upload" class="upload-btn">Select CSV File</label>
+                <input type="submit" value="Upload" class="upload-btn">
+            </form>
+        </div>
+        {% if success_message %}
+        <p class="success-message">{{ success_message }}</p>
+        {% endif %}
+        {% if error_message %}
+        <p class="error-message">{{ error_message }}</p>
+        {% endif %}
+        <div class="data-table">
+            {% if data %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Year of Release</th>
+                        <th>Director</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in data %}
+                    <tr>
+                        <td>{{ row[2] }}</td>
+                        <td>{{ row[0] }}</td>
+                        <td>{{ row[6] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p>No data available.</p>
+            {% endif %}
+        </div>
+        <div class="chart-container">
+            {% if data or example_chart_data %}
+            <h2>Movie Count by Year</h2>
+            <canvas id="chart" height="200"></canvas>
+            <p class="chart-description">This chart represents the count of movies by year.</p>
+            {% endif %}
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var ctx = document.getElementById('chart').getContext('2d');
+            var chartData = {
+                labels: {% if data %}{{ chart_data.labels|tojson }}{% else %}{{ example_chart_data.labels|tojson }}{% endif %},
+                datasets: [{
+                    label: 'Movies',
+                    data: {% if data %}{{ chart_data.data|tojson }}{% else %}{{ example_chart_data.data|tojson }}{% endif %},
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            };
+            new Chart(ctx, {
+                type: 'bar',
+                data: chartData,
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            stepSize: 1
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
